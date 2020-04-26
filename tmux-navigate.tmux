@@ -1,5 +1,7 @@
+#!/bin/sh
+#
 # Intelligently navigate tmux panes and Vim splits using the same keys.
-# See https://sunaku.github.io/tmux-select-pane.html for documentation.
+# This also supports SSH tunnels where Vim is running on a remote host.
 #
 #      +-------------+------------+-----------------------------+
 #      | inside Vim? | is Zoomed? | Action taken by key binding |
@@ -10,8 +12,14 @@
 #      | Yes         | Yes        | Focus directional Vim split |
 #      +-------------+------------+-----------------------------+
 #
-vim_navigation_timeout=0.05 # number of seconds we give Vim to navigate
-navigate='                                                             \
+# See https://sunaku.github.io/tmux-select-pane.html for documentation.
+
+get_tmux_option() { tmux show-option -gqv "$@" | grep . ;}
+
+timeout=$(get_tmux_option '@navigate-timeout') || timeout=0.05 # seconds
+navigate="                                                             \
+  vim_navigation_timeout=$timeout;                                     \
+"'                                                                     \
   pane_title="#{q:pane_title}";                                        \
   pane_current_command="#{q:pane_current_command}";                    \
   pane_is_zoomed() {                                                   \
@@ -67,16 +75,11 @@ navigate_back=" $navigate 'tmux select-pane -l || tmux select-pane -t1'\
                           'tmux send-keys C-w p'                       \
                           'pane_is_zoomed'                             "
 
-## QWERTY keys - comment these out if you don't use QWERTY layout!
-#bind-key -n M-h run-shell -b "$navigate_left"
-#bind-key -n M-j run-shell -b "$navigate_down"
-#bind-key -n M-k run-shell -b "$navigate_up"
-#bind-key -n M-l run-shell -b "$navigate_right"
-#bind-key -n M-\ run-shell -b "$navigate_back"
-
-# Dvorak keys - comment these out if you don't use Dvorak layout!
-bind-key -n M-d run-shell -b "$navigate_back"
-bind-key -n M-h run-shell -b "$navigate_left"
-bind-key -n M-t run-shell -b "$navigate_up"
-bind-key -n M-n run-shell -b "$navigate_down"
-bind-key -n M-s run-shell -b "$navigate_right"
+for direction in left down up right back; do
+  option="@navigate-$direction"
+  handler="navigate_$direction"
+  if key=$(get_tmux_option "$option"); then
+    eval "action=\$$handler" # resolve handler variable
+    tmux bind-key $key run-shell -b ": $option; $action"
+  fi
+done

@@ -1,3 +1,78 @@
+# tmux-navigate
+
+Intelligently navigate tmux panes and Vim splits using the same keys.
+This also supports SSH tunnels where Vim is running on a remote host.
+
+  | inside Vim? | is Zoomed? | Action taken by key binding |
+  | ----------- | ---------- | --------------------------- |
+  | No          | No         | Focus directional tmux pane |
+  | No          | Yes        | Nothing: ignore key binding |
+  | Yes         | No         | Seamlessly focus Vim / tmux |
+  | Yes         | Yes        | Focus directional Vim split |
+
+See https://sunaku.github.io/tmux-select-pane.html for documentation.
+
+## Installation
+
+1. Install the [TPM] framework for tmux.
+
+[TPM]: https://github.com/tmux-plugins/tpm
+
+2. Add this line to your `~/.tmux.conf`:
+```sh
+set -g @plugin 'sunaku/tmux-navigate'
+```
+
+3. Configure your navigation shortcuts:
+```sh
+# if you're using QWERTY layout
+set -g @navigate-left  '-n M-h'
+set -g @navigate-down  '-n M-j'
+set -g @navigate-up    '-n M-k'
+set -g @navigate-right '-n M-l'
+set -g @navigate-back  '-n M-\'
+
+# if you're using DVORAK layout
+set -g @navigate-back  '-n M-d'
+set -g @navigate-left  '-n M-h'
+set -g @navigate-up    '-n M-t'
+set -g @navigate-down  '-n M-n'
+set -g @navigate-right '-n M-s'
+```
+
+4. Timeout for very slow Vim (optional):
+```sh
+# set this ONLY IF your Vim is very slow
+set -g @navigate-timeout 1.618 # seconds
+# propagation delay for Vim title change
+```
+
+5. Reload your tmux configuration file.
+
+6. Type <kbd>prefix</kbd>+<kbd>I</kbd>.
+
+### Vim integration - when using Vim remotely via SSH
+
+When you run `ssh` in a tmux pane to connect to another machine and run Vim
+there, tmux only sees `ssh` running in the pane: it doesn't know about Vim!
+
+To help tmux see Vim, let's make Vim announce itself through the pane title by
+loading the provided `plugin/tmux-navigate.vim` script into your Vim session.
+
+You can do this either (1) manually by running the `:source` command in Vim,
+or (2) have Vim do it automatically on startup by installing this repository
+using your favorite Vim plugin manager or by symlinking from this repository:
+
+> Option 1: use your favorite Vim plugin manager
+```vim
+Plug 'sunaku/tmux-navigate'
+```
+
+> Option 2: symlink from your tmux plugins clone
+```sh
+ln -s ~/.tmux/plugins/tmux-navigate/plugin/tmux-navigate.vim ~/.vim/plugin/
+```
+
 ## License
 
 [Spare A Life]: https://sunaku.github.io/vegan-for-life.html
