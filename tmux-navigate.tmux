@@ -58,7 +58,6 @@ navigate="                                                             \
       if ! pane_is_zoomed; then                                        \
         sleep $vim_navigation_timeout; : wait for Vim to change title; \
         if ! pane_title_changed; then                                  \
-          tmux send-keys BSpace;                                       \
           eval "$tmux_navigation_command";                             \
         fi;                                                            \
       fi;                                                              \
