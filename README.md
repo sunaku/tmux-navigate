@@ -51,17 +51,7 @@ set -g @navigate-timeout 1.618 # seconds
 
 6. Type <kbd>prefix</kbd>+<kbd>I</kbd>.
 
-### Vim integration - when using Vim remotely via SSH
-
-When you run `ssh` in a tmux pane to connect to another machine and run Vim
-there, tmux only sees `ssh` running in the pane: it doesn't know about Vim!
-
-To help tmux see Vim, let's make Vim announce itself through the pane title by
-loading the provided `plugin/tmux-navigate.vim` script into your Vim session.
-
-You can do this either (1) manually by running the `:source` command in Vim,
-or (2) have Vim do it automatically on startup by installing this repository
-using your favorite Vim plugin manager or by symlinking from this repository:
+### Vim integration
 
 > Option 1: use your favorite Vim plugin manager
 ```vim
@@ -70,6 +60,7 @@ Plug 'sunaku/tmux-navigate'
 
 > Option 2: symlink from your tmux plugins clone
 ```sh
+mkdir -p ~/.vim/plugin/
 ln -s ~/.tmux/plugins/tmux-navigate/plugin/tmux-navigate.vim ~/.vim/plugin/
 ```
 
