@@ -40,16 +40,10 @@ set -g @navigate-down  '-n M-n'
 set -g @navigate-right '-n M-s'
 ```
 
-4. Timeout for very slow Vim (optional):
-```sh
-# set this ONLY IF your Vim is very slow
-set -g @navigate-timeout 1.618 # seconds
-# propagation delay for Vim title change
-```
+4. Reload your tmux configuration file.
 
-5. Reload your tmux configuration file.
-
-6. Type <kbd>prefix</kbd>+<kbd>I</kbd>.
+5. Type <kbd>prefix</kbd>+<kbd>I</kbd>.
+   (This makes TPM install the plugin.)
 
 ### Vim integration
 

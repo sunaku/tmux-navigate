@@ -16,17 +16,11 @@
 
 get_tmux_option() { tmux show-option -gqv "$@" | grep . ;}
 
-timeout=$(get_tmux_option '@navigate-timeout') || timeout=0.05 # seconds
-navigate="                                                             \
-  vim_navigation_timeout=$timeout;                                     \
-"'                                                                     \
+navigate='                                                             \
   pane_title="#{q:pane_title}";                                        \
   pane_current_command="#{q:pane_current_command}";                    \
   pane_is_zoomed() {                                                   \
     test #{window_zoomed_flag} -eq 1;                                  \
-  };                                                                   \
-  pane_title_changed() {                                               \
-    test "$pane_title" != "$(tmux display -p "##{q:pane_title}")";     \
   };                                                                   \
   command_is_vim() {                                                   \
     case "${1%% *}" in                                                 \
@@ -50,18 +44,20 @@ navigate="                                                             \
     tmux_navigation_command=$1;                                        \
     vim_navigation_command=$2;                                         \
     vim_navigation_only_if=${3:-true};                                 \
+    navigate_tmux_if_unzoomed=true;                                    \
     if pane_contains_vim && eval "$vim_navigation_only_if"; then       \
       if pane_contains_neovim_terminal; then                           \
         tmux send-keys C-\\ C-n;                                       \
       fi;                                                              \
-      eval "$vim_navigation_command";                                  \
-      if ! pane_is_zoomed; then                                        \
-        sleep $vim_navigation_timeout; : wait for Vim to change title; \
-        if ! pane_title_changed; then                                  \
-          eval "$tmux_navigation_command";                             \
-        fi;                                                            \
-      fi;                                                              \
-    elif ! pane_is_zoomed; then                                        \
+      vim_available_directions=l"${pane_title####* }";                 \
+      tmux_navigate_direction=${tmux_navigation_command##* -};         \
+      tmux_navigate_direction=${tmux_navigate_direction%% *};          \
+      case "$vim_available_directions" in (*$tmux_navigate_direction*) \
+        navigate_tmux_if_unzoomed=false;                               \
+        eval "$vim_navigation_command";;                               \
+      esac;                                                            \
+    fi;                                                                \
+    if $navigate_tmux_if_unzoomed && ! pane_is_zoomed; then            \
       eval "$tmux_navigation_command";                                 \
     fi;                                                                \
   };                                                                   \
