@@ -17,13 +17,13 @@
 get_tmux_option() { tmux show-option -gqv "$@" | grep . ;}
 
 navigate=$(sed '1,/^exit #.*$/d; s/^ *#.*//; /^$/d' "$0")
-navigate_left=" $navigate 'tmux select-pane -L'  'tmux send-keys C-w h'"
-navigate_down=" $navigate 'tmux select-pane -D'  'tmux send-keys C-w j'"
-navigate_up="   $navigate 'tmux select-pane -U'  'tmux send-keys C-w k'"
-navigate_right="$navigate 'tmux select-pane -R'  'tmux send-keys C-w l'"
-navigate_back=" $navigate 'tmux select-pane -l || tmux select-pane -t1'\
-                          'tmux send-keys C-w p'                       \
-                          'pane_is_zoomed'                             "
+navigate_left=" $navigate L 'tmux select-pane -L'  'tmux send-keys C-w h'"
+navigate_down=" $navigate D 'tmux select-pane -D'  'tmux send-keys C-w j'"
+navigate_up="   $navigate U 'tmux select-pane -U'  'tmux send-keys C-w k'"
+navigate_right="$navigate R 'tmux select-pane -R'  'tmux send-keys C-w l'"
+navigate_back=" $navigate l 'tmux select-pane -l || tmux select-pane -t1'\
+                            'tmux send-keys C-w p'                       \
+                            'pane_is_zoomed'                             "
 
 for direction in left down up right back; do
   option="@navigate-$direction"
@@ -80,9 +80,10 @@ pane_contains_neovim_terminal() {
 }
 
 navigate() {
-  tmux_navigation_command=$1
-  vim_navigation_command=$2
-  vim_navigation_only_if=${3:-true}
+  tmux_navigation_direction=$1
+  tmux_navigation_command=$2
+  vim_navigation_command=$3
+  vim_navigation_only_if=${4:-true}
 
   # try navigating Vim
   if pane_contains_vim && eval "$vim_navigation_only_if"; then
@@ -90,25 +91,22 @@ navigate() {
     # parse navigable directions from Vim's title
     vim_navigable_directions=${pane_title####* }
 
-    # parse desired direction from $tmux_navigation_command
-    tmux_navigate_direction=${tmux_navigation_command##* -}
-    tmux_navigate_direction=${tmux_navigate_direction%% *}
-
-    # navigate to desired direction if navigable inside Vim
-    case "l$vim_navigable_directions" in (*$tmux_navigate_direction*)
+    # if desired direction is navigable in Vim...
+    case "l$vim_navigable_directions" in (*$tmux_navigation_direction*)
 
       # leave insert mode in NeoVim terminal
       if pane_contains_neovim_terminal; then
         tmux send-keys C-\\ C-n
       fi
 
+      # navigate Vim and don't fall through
       eval "$vim_navigation_command"
-      return # avoid falling through
+      return
 
       ;;
     esac
 
-    # otherwise, fall through to navigate tmux (outside Vim)
+    # otherwise fall through into tmux navigation
   fi
 
   # try navigating tmux
