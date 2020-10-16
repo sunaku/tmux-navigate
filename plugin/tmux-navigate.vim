@@ -5,7 +5,7 @@
 " See https://sunaku.github.io/tmux-select-pane.html for documentation.
 
 let progname = substitute($VIM, '.*[/\\]', '', '')
-set title titlestring=%{progname}\ %f\ +%l\ #%{TmuxNavigateDirections()}
+set title titlestring=%{progname}\ %f\ #%{TmuxNavigateDirections()}
 
 function! TmuxNavigateDirections() abort
   let [y, x] = win_screenpos('.')
