@@ -58,14 +58,8 @@ command_is_vim() {
 }
 
 pane_contains_vim() {
-  case "$pane_current_command" in
-    (git|*sh)
-      command_is_vim "$pane_title"
-      ;;
-    (*)
-      command_is_vim "$pane_current_command"
-      ;;
-  esac
+  command_is_vim "$pane_current_command" ||
+  command_is_vim "$pane_title"
 }
 
 pane_contains_neovim_terminal() {
