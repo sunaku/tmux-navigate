@@ -16,14 +16,19 @@
 
 get_tmux_option() { tmux show-option -gqv "$@" | grep . ;}
 
-navigate=$(sed '1,/^exit #.*$/d; s/^ *#.*//; /^$/d' "$0")
-navigate_left=" $navigate L 'tmux select-pane -L'  'tmux send-keys C-w h'"
-navigate_down=" $navigate D 'tmux select-pane -D'  'tmux send-keys C-w j'"
-navigate_up="   $navigate U 'tmux select-pane -U'  'tmux send-keys C-w k'"
-navigate_right="$navigate R 'tmux select-pane -R'  'tmux send-keys C-w l'"
-navigate_back=" $navigate l 'tmux select-pane -l || tmux select-pane -t1'\
-                            'tmux send-keys C-w p'                       \
-                            'pane_is_zoomed'                             "
+%hidden navigate=$(sed '1,/^exit #.*$/d; s/^ *#.*//; /^$/d' "$0")
+%hidden \
+     navigate_left=" $navigate L 'tmux select-pane -L'  'tmux send-keys C-w h'"
+%hidden \
+     navigate_down=" $navigate D 'tmux select-pane -D'  'tmux send-keys C-w j'"
+%hidden \
+       navigate_up=" $navigate U 'tmux select-pane -U'  'tmux send-keys C-w k'"
+%hidden \
+    navigate_right=" $navigate R 'tmux select-pane -R'  'tmux send-keys C-w l'"
+%hidden \
+     navigate_back=" $navigate l 'tmux select-pane -l || tmux select-pane -t1'\
+                                 'tmux send-keys C-w p'                       \
+                                 'pane_is_zoomed'                             "
 
 for direction in left down up right back; do
   option="@navigate-$direction"
@@ -38,9 +43,9 @@ exit #------------------------------------------------------------------------
 
 # interpolate tmux values ONCE at "compile time"
 # (this is the reason for the double ## escapes)
-pane_title="#{q:pane_title}"
-pane_current_command="#{q:pane_current_command}"
-window_zoomed_flag=#{window_zoomed_flag}
+%hidden pane_title="#{q:pane_title}"
+%hidden pane_current_command="#{q:pane_current_command}"
+%hidden window_zoomed_flag=#{window_zoomed_flag}
 
 pane_is_zoomed() {
   test $window_zoomed_flag -eq 1
